@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Esfinge de Gizé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@500;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        
+        /* Fonte temática para o título */
+        .font-theme { font-family: 'Cinzel', serif; }
+
+        .pulse-active { animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .tab-active { background-color: #3b82f6; color: white; }
+        .tab-inactive { background-color: transparent; color: #94a3b8; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-slate-200 h-[100dvh] flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 flex flex-col h-full max-h-[850px] overflow-hidden relative">
+        
+        <!-- Header Temático -->
+        <div class="px-6 py-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center z-10">
+            <div class="flex flex-col">
+                <h1 class="text-xl font-bold font-theme text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 drop-shadow-sm">
+                    Esfinge de Gizé
+                </h1>
+                <p class="text-[10px] text-amber-500/80 italic tracking-wider font-light mt-0.5">
+                    "Decifra-me, ou te devoro!"
+                </p>
+            </div>
+            <button onclick="toggleSettings()" class="text-slate-500 hover:text-amber-400 p-2 transition-colors">
+                <i class="fa-solid fa-gear text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Navegação (Abas) -->
+        <div class="p-2 mx-4 mt-4 bg-slate-950 rounded-xl flex border border-slate-800">
+            <button onclick="switchMode('mic')" id="tab-mic" class="flex-1 py-2 rounded-lg text-sm font-medium transition-all tab-active flex items-center justify-center gap-2">
+                <i class="fa-solid fa-microphone"></i> Microfone
+            </button>
+            <button onclick="switchMode('upload')" id="tab-upload" class="flex-1 py-2 rounded-lg text-sm font-medium transition-all tab-inactive flex items-center justify-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Arquivo
+            </button>
+        </div>
+
+        <!-- Área Principal -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide" id="main-content">
+            
+            <!-- SEÇÃO MIC -->
+            <div id="section-mic" class="space-y-4 transition-all duration-300">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs text-slate-500 px-1">
+                        <span class="font-semibold uppercase">O Enigma (Ao Vivo)</span>
+                        <span id="status-tag" class="text-emerald-500 hidden animate-pulse">● Ouvindo</span>
+                    </div>
+                    <div class="relative group">
+                        <div id="transcript-box" class="w-full h-48 bg-slate-950 rounded-xl p-4 text-[15px] leading-relaxed text-slate-300 overflow-y-auto border border-slate-800 focus:border-amber-500/50 outline-none transition-colors" contenteditable="true" placeholder="Fale o enigma..."></div>
+                        <!-- Botão Copiar da Transcrição ao Vivo -->
+                        <button onclick="copyToClipboard('transcript-box', this)" class="absolute top-2 right-2 p-2 bg-slate-800/80 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 text-xs backdrop-blur-sm transition-all shadow-sm z-10" title="Copiar texto">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO UPLOAD -->
+            <div id="section-upload" class="hidden space-y-4 transition-all duration-300">
+                <div class="border-2 border-dashed border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:border-amber-500/50 hover:bg-slate-800/30 transition-all cursor-pointer relative group" onclick="document.getElementById('file-input').click()">
+                    
+                    <input type="file" id="file-input" accept="audio/*" class="hidden" onchange="handleFileSelect(event)">
+                    
+                    <div id="upload-placeholder" class="space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-amber-500/70 group-hover:scale-110 transition-transform group-hover:text-amber-400">
+                            <i class="fa-solid fa-music text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-slate-300">Entregue o áudio à Esfinge</p>
+                        <p class="text-xs text-slate-500">MP3, WAV, AAC (Máx 10MB)</p>
+                    </div>
+
+                    <div id="file-info" class="hidden w-full relative z-20">
+                        <div class="flex items-center justify-between mb-3 bg-slate-800 p-2 rounded-lg">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="w-8 h-8 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-file-audio"></i>
+                                </div>
+                                <span id="filename" class="text-xs text-slate-200 truncate font-medium">audio.mp3</span>
+                            </div>
+                            <button onclick="removeFile(event)" class="text-slate-500 hover:text-red-400 p-1"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <audio id="audio-preview" controls class="w-full h-8 rounded opacity-80"></audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÁREA DE RESULTADOS -->
+            <div id="result-area" class="hidden pt-4 border-t border-slate-800 animate-fade-in space-y-3 pb-20">
+                
+                <!-- Abas de Resultado -->
+                <div class="flex gap-4 mb-1 border-b border-slate-800 pb-2">
+                    <button id="btn-show-summary" onclick="toggleResultView('summary')" class="text-xs font-bold text-amber-400 border-b-2 border-amber-400 pb-1 transition-colors">A Decifração (Resumo)</button>
+                    <button id="btn-show-transcript" onclick="toggleResultView('transcript')" class="text-xs font-bold text-slate-500 pb-1 hover:text-slate-300 transition-colors">Transcrição Completa</button>
+                </div>
+
+                <!-- 1. Conteúdo Resumo -->
+                <div id="view-summary" class="relative group">
+                    <div class="bg-slate-800/50 rounded-xl p-5 border border-amber-500/20 text-sm text-amber-100 leading-relaxed shadow-lg">
+                        <p id="summary-text" class="pr-6"></p> 
+                    </div>
+                    <!-- Botão Copiar Resumo -->
+                    <button onclick="copyToClipboard('summary-text', this)" class="absolute top-3 right-3 p-2 bg-amber-900/40 border border-amber-500/30 rounded-lg text-amber-300 hover:bg-amber-800/50 hover:text-white text-xs transition-all shadow-sm backdrop-blur-sm" title="Copiar Resumo">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+                <!-- 2. Conteúdo Transcrição Completa -->
+                <div id="view-transcript" class="hidden relative group">
+                    <div class="bg-slate-950 rounded-xl p-4 border border-slate-800 text-sm text-slate-400 leading-relaxed h-56 overflow-y-auto">
+                        <p id="full-transcript-text" class="pr-6"></p>
+                    </div>
+                    <!-- Botão Copiar Transcrição -->
+                    <button onclick="copyToClipboard('full-transcript-text', this)" class="absolute top-3 right-5 p-2 bg-slate-800/90 border border-slate-700 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 text-xs transition-all shadow-sm backdrop-blur-sm" title="Copiar Transcrição">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Controles Inferiores -->
+        <div class="p-5 bg-slate-900 border-t border-slate-800 absolute bottom-0 w-full z-20">
+            <div class="flex items-center justify-between gap-4">
+                
+                <button onclick="clearApp()" class="w-12 h-12 rounded-full text-slate-500 hover:bg-slate-800 hover:text-red-400 transition-all flex items-center justify-center" title="Reiniciar Enigma">
+                    <i class="fa-solid fa-trash-alt"></i>
+                </button>
+
+                <!-- Botão de Ação Principal -->
+                <div class="relative">
+                    <button id="action-btn" onclick="handleAction()" class="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-2xl shadow-xl shadow-blue-900/30 transition-all flex items-center justify-center transform active:scale-95">
+                        <i class="fa-solid fa-microphone" id="action-icon"></i>
+                    </button>
+                    <!-- Loading Ring -->
+                    <div id="loading-ring" class="hidden absolute -inset-1 border-4 border-amber-500 border-t-transparent rounded-full animate-spin pointer-events-none"></div>
+                </div>
+
+                <!-- Botão Processar -->
+                <button id="process-btn" onclick="processContent()" class="h-12 px-5 rounded-full bg-slate-800 text-slate-500 font-medium text-sm transition-all disabled:opacity-50 flex items-center gap-2 disabled:cursor-not-allowed" disabled>
+                    <span>Decifrar</span> <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal API -->
+        <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+                <h3 class="text-lg font-bold text-amber-500 mb-2 font-theme">Chave da Sabedoria</h3>
+                <p class="text-xs text-slate-400 mb-4">Insira sua API Key do Gemini para que a Esfinge possa responder.</p>
+                <input type="password" id="api-key-input" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-3 text-white text-sm outline-none focus:border-amber-500 mb-4" placeholder="Cole sua chave aqui...">
+                <div class="flex justify-end gap-2">
+                    <button onclick="toggleSettings()" class="px-4 py-2 text-slate-400 text-sm hover:text-white">Cancelar</button>
+                    <button onclick="saveApiKey()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO ---
+        let state = {
+            mode: 'mic', 
+            isRecording: false,
+            recognition: null,
+            micText: "",
+            fileData: null,
+            fileMimeType: null,
+            apiKey: localStorage.getItem('gemini_api_key') || ''
+        };
+
+        const els = {
+            sectionMic: document.getElementById('section-mic'),
+            sectionUpload: document.getElementById('section-upload'),
+            transcriptBox: document.getElementById('transcript-box'),
+            statusTag: document.getElementById('status-tag'),
+            fileInput: document.getElementById('file-input'),
+            uploadPlaceholder: document.getElementById('upload-placeholder'),
+            fileInfo: document.getElementById('file-info'),
+            filename: document.getElementById('filename'),
+            audioPreview: document.getElementById('audio-preview'),
+            resultArea: document.getElementById('result-area'),
+            summaryText: document.getElementById('summary-text'),
+            fullTranscriptText: document.getElementById('full-transcript-text'),
+            actionBtn: document.getElementById('action-btn'),
+            actionIcon: document.getElementById('action-icon'),
+            processBtn: document.getElementById('process-btn'),
+            loadingRing: document.getElementById('loading-ring'),
+            settingsModal: document.getElementById('settings-modal'),
+            apiKeyInput: document.getElementById('api-key-input')
+        };
+
+        // --- SPEECH API ---
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            state.recognition = new SpeechRecognition();
+            state.recognition.continuous = true;
+            state.recognition.interimResults = true;
+            state.recognition.lang = 'pt-BR';
+            
+            state.recognition.onstart = () => {
+                state.isRecording = true;
+                updateActionBtnUI();
+                els.statusTag.style.display = 'block';
+            };
+            
+            state.recognition.onend = () => {
+                if (state.isRecording) state.recognition.start();
+                else {
+                    els.statusTag.style.display = 'none';
+                    updateActionBtnUI();
+                }
+            };
+
+            state.recognition.onresult = (event) => {
+                let interim = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        state.micText = mergeText(state.micText, event.results[i][0].transcript);
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+                els.transcriptBox.innerHTML = state.micText + `<span class="text-slate-500 italic"> ${interim}</span>`;
+                els.transcriptBox.scrollTop = els.transcriptBox.scrollHeight;
+                checkReadyToProcess();
+            };
+        }
+
+        // --- LÓGICA DE TEXTO E CÓPIA ---
+        
+        function mergeText(original, newSegment) {
+            const cleanOrg = original.trim();
+            const cleanNew = newSegment.trim();
+            if (!cleanOrg) return cleanNew;
+            
+            const orgLower = cleanOrg.toLowerCase();
+            const newLower = cleanNew.toLowerCase();
+            const maxOverlap = Math.min(newLower.length, 30);
+            
+            for (let i = maxOverlap; i > 2; i--) {
+                if (orgLower.slice(-i) === newLower.slice(0, i)) {
+                    return cleanOrg + cleanNew.slice(i);
+                }
+            }
+            return cleanOrg + (!/[.!?,]$/.test(cleanOrg) ? ' ' : '') + cleanNew;
+        }
+
+        function copyToClipboard(elementId, btnElement) {
+            const text = document.getElementById(elementId).innerText;
+            if(!text.trim()) return;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = btnElement.querySelector('i');
+                const originalClass = icon.className;
+                
+                icon.className = "fa-solid fa-check";
+                btnElement.classList.add("bg-green-500/20", "text-green-400");
+                
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    btnElement.classList.remove("bg-green-500/20", "text-green-400");
+                }, 2000);
+            }).catch(err => {
+                console.error('Falha ao copiar:', err);
+                alert("A Esfinge não conseguiu copiar o texto.");
+            });
+        }
+
+        // --- LÓGICA DE INTERFACE ---
+
+        function switchMode(mode) {
+            state.mode = mode;
+            document.getElementById('tab-mic').className = `flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${mode === 'mic' ? 'tab-active' : 'tab-inactive'}`;
+            document.getElementById('tab-upload').className = `flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${mode === 'upload' ? 'tab-active' : 'tab-inactive'}`;
+
+            if (mode === 'mic') {
+                els.sectionMic.classList.remove('hidden');
+                els.sectionUpload.classList.add('hidden');
+            } else {
+                els.sectionMic.classList.add('hidden');
+                els.sectionUpload.classList.remove('hidden');
+                if (state.isRecording) handleAction(); 
+            }
+            updateActionBtnUI();
+            checkReadyToProcess();
+        }
+
+        function handleAction() {
+            if (state.mode === 'mic') {
+                if (!state.recognition) return alert("A Esfinge não ouve neste navegador.");
+                if (state.isRecording) {
+                    state.isRecording = false;
+                    state.recognition.stop();
+                } else {
+                    state.recognition.start();
+                }
+            } else {
+                if (!state.fileData) {
+                    els.fileInput.click();
+                } else {
+                    const audio = els.audioPreview;
+                    if (audio.paused) audio.play(); else audio.pause();
+                }
+            }
+        }
+
+        function updateActionBtnUI() {
+            const btn = els.actionBtn;
+            const icon = els.actionIcon;
+
+            if (state.mode === 'mic') {
+                if (state.isRecording) {
+                    btn.className = "w-16 h-16 rounded-full bg-red-500 text-white text-2xl shadow-xl shadow-red-900/40 pulse-active flex items-center justify-center";
+                    icon.className = "fa-solid fa-stop";
+                } else {
+                    btn.className = "w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-2xl shadow-xl shadow-blue-900/30 transition-all flex items-center justify-center";
+                    icon.className = "fa-solid fa-microphone";
+                }
+            } else {
+                if (state.fileData) {
+                    btn.className = "w-16 h-16 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-2xl shadow-xl shadow-emerald-900/30 transition-all flex items-center justify-center";
+                    icon.className = "fa-solid fa-play";
+                } else {
+                    btn.className = "w-16 h-16 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-400 text-2xl shadow-xl transition-all flex items-center justify-center";
+                    icon.className = "fa-solid fa-cloud-arrow-up";
+                }
+            }
+        }
+
+        // --- ARQUIVO E API ---
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) return alert("Este arquivo é grande demais para a Esfinge (Máx 10MB).");
+
+            els.uploadPlaceholder.classList.add('hidden');
+            els.fileInfo.classList.remove('hidden');
+            els.filename.innerText = file.name;
+            els.audioPreview.src = URL.createObjectURL(file);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                state.fileData = e.target.result.split(',')[1];
+                state.fileMimeType = file.type;
+                updateActionBtnUI();
+                checkReadyToProcess();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeFile(e) {
+            e.stopPropagation();
+            state.fileData = null;
+            els.fileInput.value = "";
+            els.uploadPlaceholder.classList.remove('hidden');
+            els.fileInfo.classList.add('hidden');
+            els.audioPreview.pause();
+            updateActionBtnUI();
+            checkReadyToProcess();
+        }
+
+        async function processContent() {
+            if (!state.apiKey) return toggleSettings();
+
+            els.processBtn.disabled = true;
+            els.processBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Decifrando...';
+            els.loadingRing.classList.remove('hidden');
+            els.resultArea.classList.add('hidden');
+
+            try {
+                let prompt = "";
+                let payloadParts = [];
+
+                if (state.mode === 'mic') {
+                    prompt = `Analise o texto transcrito. Gere um JSON com:
+                    1. "resumo": Resumo conciso em parágrafo bem escrito.
+                    2. "transcricao": O texto corrigido gramaticalmente.
+                    Texto: "${els.transcriptBox.innerText}"`;
+                    payloadParts.push({ text: prompt });
+                } else {
+                    prompt = `Ouça o áudio. Gere um JSON com:
+                    1. "resumo": Resumo conciso e inteligente em Português.
+                    2. "transcricao": A transcrição completa do áudio.`;
+                    payloadParts.push({ text: prompt });
+                    payloadParts.push({ inlineData: { mimeType: state.fileMimeType, data: state.fileData } });
+                }
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${state.apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: payloadParts }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                if (!response.ok) throw new Error((await response.json()).error?.message || "Erro na API");
+
+                const data = await response.json();
+                const json = JSON.parse(data.candidates[0].content.parts[0].text);
+
+                els.summaryText.innerText = json.resumo;
+                els.fullTranscriptText.innerText = json.transcricao;
+
+                els.resultArea.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('main-content').scrollTo({ 
+                        top: document.getElementById('main-content').scrollHeight, 
+                        behavior: 'smooth' 
+                    });
+                }, 300);
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao decifrar: " + error.message);
+                if(error.message.includes("API key")) toggleSettings();
+            } finally {
+                els.processBtn.disabled = false;
+                els.processBtn.innerHTML = '<span>Decifrar</span> <i class="fa-solid fa-wand-magic-sparkles"></i>';
+                els.loadingRing.classList.add('hidden');
+            }
+        }
+
+        // --- UTILS ---
+        function checkReadyToProcess() {
+            let ready = (state.mode === 'mic') ? els.transcriptBox.innerText.length > 10 : !!state.fileData;
+            els.processBtn.disabled = !ready;
+            els.processBtn.className = ready 
+                ? "h-12 px-5 rounded-full bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm transition-all flex items-center gap-2 shadow-lg shadow-amber-900/20" 
+                : "h-12 px-5 rounded-full bg-slate-800 text-slate-500 font-medium text-sm transition-all flex items-center gap-2 disabled:cursor-not-allowed";
+        }
+
+        function toggleResultView(view) {
+            const btnSummary = document.getElementById('btn-show-summary');
+            const btnTranscript = document.getElementById('btn-show-transcript');
+            const divSummary = document.getElementById('view-summary');
+            const divTranscript = document.getElementById('view-transcript');
+
+            if (view === 'summary') {
+                btnSummary.className = "text-xs font-bold text-amber-400 border-b-2 border-amber-400 pb-1";
+                btnTranscript.className = "text-xs font-bold text-slate-500 pb-1 hover:text-slate-300";
+                divSummary.classList.remove('hidden');
+                divTranscript.classList.add('hidden');
+            } else {
+                btnSummary.className = "text-xs font-bold text-slate-500 pb-1 hover:text-slate-300";
+                btnTranscript.className = "text-xs font-bold text-blue-400 border-b-2 border-blue-400 pb-1";
+                divSummary.classList.add('hidden');
+                divTranscript.classList.remove('hidden');
+            }
+        }
+
+        function clearApp() {
+            state.micText = ""; state.fileData = null; els.transcriptBox.innerHTML = ""; els.fileInput.value = "";
+            removeFile({stopPropagation:()=>{}}); els.resultArea.classList.add('hidden');
+            if (state.isRecording) handleAction();
+            checkReadyToProcess();
+        }
+
+        function toggleSettings() { els.settingsModal.classList.toggle('hidden'); els.apiKeyInput.value = state.apiKey; }
+        function saveApiKey() { state.apiKey = els.apiKeyInput.value.trim(); localStorage.setItem('gemini_api_key', state.apiKey); toggleSettings(); }
+    </script>
+</body>
+</html>
+
+
