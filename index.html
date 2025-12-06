@@ -10,8 +10,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@500;700&display=swap');
         
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
-        
-        /* Fonte temática para o título */
         .font-theme { font-family: 'Cinzel', serif; }
 
         .pulse-active { animation: pulse-red 1.5s infinite; }
@@ -65,7 +63,6 @@
                     </div>
                     <div class="relative group">
                         <div id="transcript-box" class="w-full h-48 bg-slate-950 rounded-xl p-4 text-[15px] leading-relaxed text-slate-300 overflow-y-auto border border-slate-800 focus:border-amber-500/50 outline-none transition-colors" contenteditable="true" placeholder="Fale o enigma..."></div>
-                        <!-- Botão Copiar da Transcrição ao Vivo -->
                         <button onclick="copyToClipboard('transcript-box', this)" class="absolute top-2 right-2 p-2 bg-slate-800/80 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 text-xs backdrop-blur-sm transition-all shadow-sm z-10" title="Copiar texto">
                             <i class="fa-regular fa-copy"></i>
                         </button>
@@ -105,29 +102,26 @@
             <!-- ÁREA DE RESULTADOS -->
             <div id="result-area" class="hidden pt-4 border-t border-slate-800 animate-fade-in space-y-3 pb-20">
                 
-                <!-- Abas de Resultado -->
                 <div class="flex gap-4 mb-1 border-b border-slate-800 pb-2">
                     <button id="btn-show-summary" onclick="toggleResultView('summary')" class="text-xs font-bold text-amber-400 border-b-2 border-amber-400 pb-1 transition-colors">A Decifração (Resumo)</button>
                     <button id="btn-show-transcript" onclick="toggleResultView('transcript')" class="text-xs font-bold text-slate-500 pb-1 hover:text-slate-300 transition-colors">Transcrição Completa</button>
                 </div>
 
-                <!-- 1. Conteúdo Resumo -->
+                <!-- Resumo -->
                 <div id="view-summary" class="relative group">
                     <div class="bg-slate-800/50 rounded-xl p-5 border border-amber-500/20 text-sm text-amber-100 leading-relaxed shadow-lg">
                         <p id="summary-text" class="pr-6"></p> 
                     </div>
-                    <!-- Botão Copiar Resumo -->
                     <button onclick="copyToClipboard('summary-text', this)" class="absolute top-3 right-3 p-2 bg-amber-900/40 border border-amber-500/30 rounded-lg text-amber-300 hover:bg-amber-800/50 hover:text-white text-xs transition-all shadow-sm backdrop-blur-sm" title="Copiar Resumo">
                         <i class="fa-regular fa-copy"></i>
                     </button>
                 </div>
 
-                <!-- 2. Conteúdo Transcrição Completa -->
+                <!-- Transcrição -->
                 <div id="view-transcript" class="hidden relative group">
                     <div class="bg-slate-950 rounded-xl p-4 border border-slate-800 text-sm text-slate-400 leading-relaxed h-56 overflow-y-auto">
                         <p id="full-transcript-text" class="pr-6"></p>
                     </div>
-                    <!-- Botão Copiar Transcrição -->
                     <button onclick="copyToClipboard('full-transcript-text', this)" class="absolute top-3 right-5 p-2 bg-slate-800/90 border border-slate-700 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 text-xs transition-all shadow-sm backdrop-blur-sm" title="Copiar Transcrição">
                         <i class="fa-regular fa-copy"></i>
                     </button>
@@ -136,24 +130,20 @@
             </div>
         </div>
 
-        <!-- Controles Inferiores -->
+        <!-- Footer / Controls -->
         <div class="p-5 bg-slate-900 border-t border-slate-800 absolute bottom-0 w-full z-20">
             <div class="flex items-center justify-between gap-4">
-                
                 <button onclick="clearApp()" class="w-12 h-12 rounded-full text-slate-500 hover:bg-slate-800 hover:text-red-400 transition-all flex items-center justify-center" title="Reiniciar Enigma">
                     <i class="fa-solid fa-trash-alt"></i>
                 </button>
 
-                <!-- Botão de Ação Principal -->
                 <div class="relative">
                     <button id="action-btn" onclick="handleAction()" class="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-2xl shadow-xl shadow-blue-900/30 transition-all flex items-center justify-center transform active:scale-95">
                         <i class="fa-solid fa-microphone" id="action-icon"></i>
                     </button>
-                    <!-- Loading Ring -->
                     <div id="loading-ring" class="hidden absolute -inset-1 border-4 border-amber-500 border-t-transparent rounded-full animate-spin pointer-events-none"></div>
                 </div>
 
-                <!-- Botão Processar -->
                 <button id="process-btn" onclick="processContent()" class="h-12 px-5 rounded-full bg-slate-800 text-slate-500 font-medium text-sm transition-all disabled:opacity-50 flex items-center gap-2 disabled:cursor-not-allowed" disabled>
                     <span>Decifrar</span> <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </button>
@@ -164,8 +154,16 @@
         <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
                 <h3 class="text-lg font-bold text-amber-500 mb-2 font-theme">Chave da Sabedoria</h3>
-                <p class="text-xs text-slate-400 mb-4">Insira sua API Key do Gemini para que a Esfinge possa responder.</p>
-                <input type="password" id="api-key-input" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-3 text-white text-sm outline-none focus:border-amber-500 mb-4" placeholder="Cole sua chave aqui...">
+                <p class="text-xs text-slate-400 mb-3">Insira sua API Key do Gemini para que a Esfinge possa responder.</p>
+                
+                <!-- Link para gerar Key -->
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-2 mb-4 w-fit p-1 -ml-1 hover:bg-amber-900/20 rounded transition-all">
+                    <i class="fa-solid fa-key"></i> Obter chave gratuita no Google
+                    <i class="fa-solid fa-external-link-alt text-[10px]"></i>
+                </a>
+
+                <input type="password" id="api-key-input" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-3 text-white text-sm outline-none focus:border-amber-500 mb-4 transition-colors" placeholder="Cole sua chave aqui...">
+                
                 <div class="flex justify-end gap-2">
                     <button onclick="toggleSettings()" class="px-4 py-2 text-slate-400 text-sm hover:text-white">Cancelar</button>
                     <button onclick="saveApiKey()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium">Salvar</button>
@@ -270,18 +268,13 @@
             navigator.clipboard.writeText(text).then(() => {
                 const icon = btnElement.querySelector('i');
                 const originalClass = icon.className;
-                
                 icon.className = "fa-solid fa-check";
                 btnElement.classList.add("bg-green-500/20", "text-green-400");
-                
                 setTimeout(() => {
                     icon.className = originalClass;
                     btnElement.classList.remove("bg-green-500/20", "text-green-400");
                 }, 2000);
-            }).catch(err => {
-                console.error('Falha ao copiar:', err);
-                alert("A Esfinge não conseguiu copiar o texto.");
-            });
+            }).catch(err => alert("Erro ao copiar."));
         }
 
         // --- LÓGICA DE INTERFACE ---
@@ -305,7 +298,7 @@
 
         function handleAction() {
             if (state.mode === 'mic') {
-                if (!state.recognition) return alert("A Esfinge não ouve neste navegador.");
+                if (!state.recognition) return alert("Navegador sem suporte.");
                 if (state.isRecording) {
                     state.isRecording = false;
                     state.recognition.stop();
@@ -350,7 +343,7 @@
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
-            if (file.size > 10 * 1024 * 1024) return alert("Este arquivo é grande demais para a Esfinge (Máx 10MB).");
+            if (file.size > 10 * 1024 * 1024) return alert("Arquivo muito grande (Máx 10MB).");
 
             els.uploadPlaceholder.classList.add('hidden');
             els.fileInfo.classList.remove('hidden');
@@ -392,7 +385,7 @@
 
                 if (state.mode === 'mic') {
                     prompt = `Analise o texto transcrito. Gere um JSON com:
-                    1. "resumo": Resumo conciso em parágrafo bem escrito.
+                    1. "resumo": Resumo conciso e bem escrito em Português.
                     2. "transcricao": O texto corrigido gramaticalmente.
                     Texto: "${els.transcriptBox.innerText}"`;
                     payloadParts.push({ text: prompt });
